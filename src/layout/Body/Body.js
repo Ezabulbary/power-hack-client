@@ -1,23 +1,49 @@
 import React, { useEffect, useState } from 'react';
-import TableData from './TableData';
+import { toast } from 'react-toastify';
 
 const Body = () => {
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
     const [error, setError] = useState('');
-    const [document, setDocument] = useState([]);
+    const [billing, setBilling] = useState([]);
+    const [billingCount, setBillingCount] = useState(0);
+    const [billingPage, setBillingPage] = useState(0);
+
     useEffect(() => {
-        fetch('http://localhost:5000/data')
+        fetch('http://localhost:5000/billing-list-count')
             .then(res => res.json())
-            .then(data => { setDocument(data) })
+            .then(data => {
+                const count = data.count;
+                const pages = Math.ceil(count / 10);
+                setBillingCount(pages);
+            })
     }, []);
 
-    const handlePhoneNumber = event => {
-        setPhoneNumber(event.target.value);
-        if (/^[-\s\.]?[0-9]{3}[)]?[-\s\.]?[0-9]{2}[-\s\.]?[0-9]{6}$/.test(event.target.value)) {
+    useEffect(() => {
+        fetch('http://localhost:5000/billing-list')
+            .then(res => res.json())
+            .then(data => { setBilling(data) })
+    }, []);
+
+    const handleEmail = event => {
+        setEmail(event.target.value);
+        if (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(event.target.value)) {
             setError('')
             return (true)
         }
-        else{
+        else {
+            setError("You have entered an invalid email address!")
+            return;
+        }
+    }
+
+    const handlePhoneNumber = event => {
+        setPhone(event.target.value);
+        if (/^[-\s.]?[0-9]{3}[)]?[-\s.]?[0-9]{2}[-\s.]?[0-9]{6}$/.test(event.target.value)) {
+            setError('')
+            return (true)
+        }
+        else {
             setError("phone number should be 11 digit, Not allow blank value!")
             return;
         }
@@ -25,27 +51,57 @@ const Body = () => {
 
     const handleAddData = (e) => {
         e.preventDefault()
-        const profile = {
+        const billingData = {
             name: e.target.name.value,
-            email: e.target.email.value,
-            phone: phoneNumber,
+            email: email,
+            phone: phone,
             amount: e.target.amount.value,
         }
 
-        console.log(profile)
-        // fetch(`https://fathomless-lake-35584.herokuapp.com/myprofile/`, {
-        //     method: 'PUT',
-        //     headers: {
-        //         'content-type': 'application/json'
-        //     },
-        //     body: JSON.stringify(profile)
+        fetch('http://localhost:5000/add-billing', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(billingData)
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                toast.success('Your Data is successfully Added!')
+                window.location.reload();
+            })
+    }
 
-        // })
-        //     .then(res => res.json())
-        //     .then(data => {
-        //         console.log(data);
-        //         // toast.success('Your Info Set to DB')
-        //     })
+    const handleEditBilling = (id) => {
+        fetch(`http://localhost:5000/update-billing/${id}`, {
+            method: 'PUT',
+            headers: {
+                'content-type': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                window.location.reload()
+            })
+    }
+
+    const handleDeleteBilling = (id) => {
+        const proceed = window.confirm('Are you sure you want to delete this item?')
+        if (proceed) {
+            fetch(`http://localhost:5000/delete-billing/${id}`, {
+                method: 'DELETE'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    // console.log(data)
+                    if (data.deletedCount) {
+                        toast.success('Bill is Deleted!')
+                        window.location.reload();
+                    }
+                })
+        }
     }
     return (
         <section>
@@ -77,7 +133,7 @@ const Body = () => {
                                         <span className="label-text">Email</span>
 
                                     </label>
-                                    <input name='email' type="text" required placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                                    <input onChange={handleEmail} name='email' type="text" required placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                                 </div>
 
                                 <div className="form-control w-full max-w-xs">
@@ -121,17 +177,29 @@ const Body = () => {
                     </thead>
                     <tbody>
                         {
-                            document.map((data, index) => <TableData
-                                key={data._id}
-                                data={data}
-                                index={index}></TableData>)
+                            billing.map((bill, index) => <tr key={bill._id}>
+                                <td>{index + 1}</td>
+                                <td>{bill._id}</td>
+                                <td>{bill.name}</td>
+                                <td>{bill.email}</td>
+                                <td>{bill.phone}</td>
+                                <td>${bill.amount}</td>
+                                <td className='space-x-4'>
+                                    <button onClick={() => handleEditBilling(bill._id)}><label htmlFor="add-billing-Modal" className="cursor-pointer modal-button">Edit</label></button>
+
+                                    <span>|</span>
+                                    <button onClick={() => handleDeleteBilling(bill._id)}>Delete</button>
+                                </td>
+                            </tr>).reverse()
                         }
                     </tbody>
                 </table>
             </div>
 
-            <div className='xl:max-w-7xl flex justify-center items-center mt-16'>
-                1,2,3
+            <div className='xl:max-w-7xl mx-auto flex justify-center items-center my-16 space-x-4'>
+                {
+                    [...Array(billingCount).keys()].map(number => <button className='border-2 rounded p-2 bg-slate-300' onClick={() => setBillingPage(number)}>{number + 1}</button>)
+                }
             </div>
         </section>
     );

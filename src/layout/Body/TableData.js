@@ -9,7 +9,7 @@ const TableData = ({data, index}) => {
             <td>{name}</td>
             <td>{email}</td>
             <td>{phone}</td>
-            <td>{amount}</td>
+            <td>${amount}</td>
             <td className='space-x-4'>
                 <button>Edit</button> 
                 <span>|</span> 
