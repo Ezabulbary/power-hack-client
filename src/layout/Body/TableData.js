@@ -1,21 +1,25 @@
 import React from 'react';
 
-const TableData = ({data, index}) => {
-    const { _id, name, email, phone, amount } = data;
+const TableData = ({ billing, handleEditBilling, handleDeleteBilling }) => {
     return (
-        <tr>
-            <td>{index + 1}</td>
-            <td>{_id}</td>
-            <td>{name}</td>
-            <td>{email}</td>
-            <td>{phone}</td>
-            <td>${amount}</td>
-            <td className='space-x-4'>
-                <button>Edit</button> 
-                <span>|</span> 
-                <button>Delete</button>
-            </td>
-        </tr>
+        <>
+            {
+                billing.map((bill, index) => <tr key={bill._id}>
+                    <td>{index + 1}</td>
+                    <td>{bill._id}</td>
+                    <td>{bill.name}</td>
+                    <td>{bill.email}</td>
+                    <td>{bill.phone}</td>
+                    <td>${bill.amount}</td>
+                    <td className='space-x-4'>
+                        <button onClick={() => handleEditBilling(bill._id)}><label htmlFor="add-billing-Modal" className="cursor-pointer modal-button">Edit</label></button>
+
+                        <span>|</span>
+                        <button onClick={() => handleDeleteBilling(bill._id)}>Delete</button>
+                    </td>
+                </tr>)
+            }
+        </>
     );
 };
 

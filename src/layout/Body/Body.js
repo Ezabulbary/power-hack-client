@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import TableData from './TableData';
 
 const Body = () => {
+    const [query, setQuery] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [billing, setBilling] = useState([]);
     const [billingCount, setBillingCount] = useState(0);
     const [billingPage, setBillingPage] = useState(0);
+    const [size, setSize] = useState(10);
+    const [billWithId, setBillWithId] = useState({});
+
+    const keys = ['name', 'email', 'phone'];
+
+    const search = events => {
+        return events.filter(event => keys.some(key  => event[key].toLowerCase().includes(query)));
+    }
 
     useEffect(() => {
         fetch('http://localhost:5000/billing-list-count')
@@ -20,10 +30,10 @@ const Body = () => {
     }, []);
 
     useEffect(() => {
-        fetch('http://localhost:5000/billing-list')
+        fetch(`http://localhost:5000/billing-list?billingPage=${billingPage}&size=${size}`)
             .then(res => res.json())
             .then(data => { setBilling(data) })
-    }, []);
+    }, [billingPage, size]);
 
     const handleEmail = event => {
         setEmail(event.target.value);
@@ -74,17 +84,23 @@ const Body = () => {
     }
 
     const handleEditBilling = (id) => {
-        fetch(`http://localhost:5000/update-billing/${id}`, {
-            method: 'PUT',
-            headers: {
-                'content-type': 'application/json'
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                console.log(data);
-                window.location.reload()
-            })
+       if(id){
+           fetch(`http://localhost:5000/update-billing/${id}`, {
+               method: 'PUT',
+               headers: {
+                   'content-type': 'application/json'
+               }
+           })
+               .then(res => res.json())
+               .then(data => {
+                   console.log(data);
+                   setBillWithId(data)
+                   if (data.matchedCount){
+                       toast.success('Bill is Updated!')
+                       window.location.reload();
+                   }
+               })
+       }
     }
 
     const handleDeleteBilling = (id) => {
@@ -109,7 +125,7 @@ const Body = () => {
                 <div className="flex-1">
                     <p className="text-xl px-6">Billings</p>
                     <div className="form-control">
-                        <input type="text" placeholder="Search" className="input input-bordered w-32 lg:w-96" />
+                        <input type="text" placeholder="Search..." className="input input-bordered w-32 lg:w-96" onChange={e => setQuery(e.target.value)} />
                     </div>
                 </div>
                 <div className="flex-none gap-2 ">
@@ -125,7 +141,7 @@ const Body = () => {
                                     <label className="label">
                                         <span className="label-text">Name</span>
                                     </label>
-                                    <input name='name' type="text" required placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                                    <input name='name' type="text" required defaultValue={billWithId?.item?.name} placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                                 </div>
 
                                 <div className="form-control w-full max-w-xs">
@@ -133,7 +149,7 @@ const Body = () => {
                                         <span className="label-text">Email</span>
 
                                     </label>
-                                    <input onChange={handleEmail} name='email' type="text" required placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                                    <input onChange={handleEmail} name='email' type="text" required defaultValue={billWithId?.item?.email} placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                                 </div>
 
                                 <div className="form-control w-full max-w-xs">
@@ -141,7 +157,7 @@ const Body = () => {
                                         <span className="label-text">PhoneNumber</span>
 
                                     </label>
-                                    <input onChange={handlePhoneNumber} name='number' type="number" required placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                                    <input onChange={handlePhoneNumber} name='number' type="number" required defaultValue={parseInt(billWithId?.item?.phone)} placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                                 </div>
 
                                 <div className="form-control w-full ">
@@ -149,7 +165,7 @@ const Body = () => {
                                         <span className="label-text">Paid Amount</span>
 
                                     </label>
-                                    <input name='amount' type="number" required placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                                    <input name='amount' type="number" required defaultValue={parseInt(billWithId?.item?.amount)} placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                                 </div>
 
                                 <p className='text-danger'>{error}</p>
@@ -176,30 +192,21 @@ const Body = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {
-                            billing.map((bill, index) => <tr key={bill._id}>
-                                <td>{index + 1}</td>
-                                <td>{bill._id}</td>
-                                <td>{bill.name}</td>
-                                <td>{bill.email}</td>
-                                <td>{bill.phone}</td>
-                                <td>${bill.amount}</td>
-                                <td className='space-x-4'>
-                                    <button onClick={() => handleEditBilling(bill._id)}><label htmlFor="add-billing-Modal" className="cursor-pointer modal-button">Edit</label></button>
-
-                                    <span>|</span>
-                                    <button onClick={() => handleDeleteBilling(bill._id)}>Delete</button>
-                                </td>
-                            </tr>).reverse()
-                        }
+                        <TableData 
+                        billing={search(billing)} 
+                        handleEditBilling={handleEditBilling} 
+                        handleDeleteBilling={handleDeleteBilling} ></TableData>
                     </tbody>
                 </table>
             </div>
 
             <div className='xl:max-w-7xl mx-auto flex justify-center items-center my-16 space-x-4'>
                 {
-                    [...Array(billingCount).keys()].map(number => <button className='border-2 rounded p-2 bg-slate-300' onClick={() => setBillingPage(number)}>{number + 1}</button>)
+                    [...Array(billingCount).keys()].map(number => <button className={billingPage === number ? 'border-2 rounded p-2 bg-black text-white' : 'border-2 rounded p-2 bg-slate-300'} onClick={() => setBillingPage(number)}>{number + 1}</button>)
                 }
+                <select className='border-2 rounded p-2 bg-slate-300' onChange={e => setSize(e.target.value)}>
+                    <option value="10">10</option>
+                </select>
             </div>
         </section>
     );
