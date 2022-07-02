@@ -16,11 +16,11 @@ const Body = () => {
     const keys = ['name', 'email', 'phone'];
 
     const search = events => {
-        return events.filter(event => keys.some(key  => event[key].toLowerCase().includes(query)));
+        return events.filter(event => keys.some(key => event[key].toLowerCase().includes(query)));
     }
 
     useEffect(() => {
-        fetch('http://localhost:5000/billing-list-count')
+        fetch('https://aqueous-ravine-07648.herokuapp.com/billing-list-count')
             .then(res => res.json())
             .then(data => {
                 const count = data.count;
@@ -30,7 +30,7 @@ const Body = () => {
     }, []);
 
     useEffect(() => {
-        fetch(`http://localhost:5000/billing-list?billingPage=${billingPage}&size=${size}`)
+        fetch(`https://aqueous-ravine-07648.herokuapp.com/billing-list?billingPage=${billingPage}&size=${size}`)
             .then(res => res.json())
             .then(data => { setBilling(data) })
     }, [billingPage, size]);
@@ -68,7 +68,7 @@ const Body = () => {
             amount: e.target.amount.value,
         }
 
-        fetch('http://localhost:5000/add-billing', {
+        fetch('https://aqueous-ravine-07648.herokuapp.com/add-billing', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -84,29 +84,29 @@ const Body = () => {
     }
 
     const handleEditBilling = (id) => {
-       if(id){
-           fetch(`http://localhost:5000/update-billing/${id}`, {
-               method: 'PUT',
-               headers: {
-                   'content-type': 'application/json'
-               }
-           })
-               .then(res => res.json())
-               .then(data => {
-                   console.log(data);
-                   setBillWithId(data)
-                   if (data.matchedCount){
-                       toast.success('Bill is Updated!')
-                       window.location.reload();
-                   }
-               })
-       }
+        if (id) {
+            fetch(`https://aqueous-ravine-07648.herokuapp.com/update-billing/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                    setBillWithId(data)
+                    if (data.matchedCount) {
+                        toast.success('Bill is Updated!')
+                        window.location.reload();
+                    }
+                })
+        }
     }
 
     const handleDeleteBilling = (id) => {
         const proceed = window.confirm('Are you sure you want to delete this item?')
         if (proceed) {
-            fetch(`http://localhost:5000/delete-billing/${id}`, {
+            fetch(`https://aqueous-ravine-07648.herokuapp.com/delete-billing/${id}`, {
                 method: 'DELETE'
             })
                 .then(res => res.json())
@@ -192,10 +192,10 @@ const Body = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        <TableData 
-                        billing={search(billing)} 
-                        handleEditBilling={handleEditBilling} 
-                        handleDeleteBilling={handleDeleteBilling} ></TableData>
+                        <TableData
+                            billing={search(billing)}
+                            handleEditBilling={handleEditBilling}
+                            handleDeleteBilling={handleDeleteBilling} ></TableData>
                     </tbody>
                 </table>
             </div>

@@ -9,7 +9,7 @@ const Header = () => {
         total += parseInt(bill.amount);
     })
     useEffect(() => {
-        fetch(`http://localhost:5000/billing-list`)
+        fetch(`https://aqueous-ravine-07648.herokuapp.com/billing-list`)
             .then(res => res.json())
             .then(data => { setBilling(data) })
     }, []);

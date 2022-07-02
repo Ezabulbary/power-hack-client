@@ -1,0 +1,13 @@
+[debug] [2022-07-02T08:48:46.340Z] ----------------------------------------------------------------------
+[debug] [2022-07-02T08:48:46.342Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Ezabul Bary\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2022-07-02T08:48:46.342Z] CLI Version:   10.9.2
+[debug] [2022-07-02T08:48:46.343Z] Platform:      win32
+[debug] [2022-07-02T08:48:46.343Z] Node Version:  v17.0.1
+[debug] [2022-07-02T08:48:46.344Z] Time:          Sat Jul 02 2022 14:48:46 GMT+0600 (Bangladesh Standard Time)
+[debug] [2022-07-02T08:48:46.344Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-07-02T08:48:46.435Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-07-02T08:48:46.435Z] > authorizing via signed-in user (ezabul.bary@gmail.com)
+[debug] [2022-07-02T08:48:46.435Z] [iam] checking project power-hack-d25b4 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2022-07-02T08:48:46.438Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/power-hack-d25b4:testIamPermissions [none]
+[debug] [2022-07-02T08:48:46.439Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/power-hack-d25b4:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
